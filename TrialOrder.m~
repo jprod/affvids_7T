@@ -1,0 +1,13 @@
+%Affective Videos
+%Trial Order Script
+%Purpose: To organize stimuli and onset times. Output them as fprintf
+
+function [trials_struct] = TrialOrder(run)
+    for i=1:numel(run)
+        
+    end
+    
+end
+%visualize design? imagesc([vidCond, imVal, predVal])
+
+

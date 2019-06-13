@@ -4,7 +4,9 @@ function [reaction_time,q_resp] = DrawQuestion(question, question_pos, poles,pol
                                             windowptr, RateOnset,mvfac,left_High)
     mouseclick = [0,0,0];
     keyIsDown = 0;
-    while ~keyIsDown && mouseclick(1)==0,  %or a certain amount of time has passed, say 4 seconds. if 4secs have passed, then NaN response
+    response_duration = 3;
+    q_resp = nan;
+    while ~keyIsDown && GetSecs - RateOnset < response_duration,  %or a certain amount of time has passed, say 4 seconds. if 4secs have passed, then NaN response
         [x,y,mouseclick] = GetMouse();%checks position of mouse
 
         if mouseclick(1),%%%%%if response is made don't do anything
@@ -48,5 +50,21 @@ function [reaction_time,q_resp] = DrawQuestion(question, question_pos, poles,pol
                 WaitSecs(.1); %prevent keyboard spillover
         end
     end
+    
+    if(~isnan(q_resp))
+    %Re-Draw the screen without marker
+        Screen('Drawtext',windowptr, question, question_pos,ycenter);%Displays text
+        Screen('Drawtext',windowptr,poles{1},poles_pos,top_all);
+        Screen('Drawtext',windowptr,poles{2},left_High,top_all);
+        Screen('DrawLine',windowptr,[],right_LineEdge,line_vert,left_LineEdge,line_vert);
+        Screen('Flip', windowptr); %Flips to rating screen
+
+        remaining_time = response_duration - (GetSecs - RateOnset);
+        WaitSecs(remaining_time);
+    else
+        reaction_time= nan;
+        q_resp = nan;
+    end
+        
 end
 
