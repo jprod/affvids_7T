@@ -44,13 +44,14 @@ function trial_order = CreateTrialOrder(...
     pain_stims = sorted_pain(trial_stim_idx);
 
     %order of stimuli in each category for each trial - randomized
-    spider_order = randperm(stimuli_per_cat_per_trial)
-    pain_order = randperm(stimuli_per_cat_per_trial)
-    height_order = randperm(stimuli_per_cat_per_trial)
+    spider_order = randperm(stimuli_per_cat_per_trial);
+    pain_order = randperm(stimuli_per_cat_per_trial);
+    height_order = randperm(stimuli_per_cat_per_trial);
     
 
     trial_order = [];
     for i=1:stimuli_per_cat_per_trial
+        
         spider_vid = spider_vids(spider_order(i));
         height_vid = height_vids(height_order(i));
         pain_stim = pain_stims(pain_order(i));

@@ -29,7 +29,7 @@ fwrite(t, '0005,0010,o'); % open the remote channel
 intensity = 7;
 duration = 3;
 
-eval(['fwrite(t, ''' sprintf('%04d',intensity) ',' sprintf('%04d',dur) ',t'');']);
+eval(['fwrite(t, ''' sprintf('%04d',intensity) ',' sprintf('%04d',duration) ',t'');']);
 
 
 

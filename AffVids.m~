@@ -16,7 +16,6 @@ inbtwtime = 1;%how long in between trials
 afterTime = 5;%how many seconds do you wait after all trials are finished
 mvfac = 120;
 response_duration = .5;%how long do people get to respond to the questions
-stimulus_duration = 1; %how long do pain and videos last
 
 ISItimeArraySp = [3,3,3.75,4,5];
 ISItimeArrayPain = [3,3,3.75,4,5];
@@ -297,7 +296,7 @@ for i = 1:ntrials %iterate through movies...
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
     
     WaitSecs(ISItime); %delay before movie.
-    %% ask pre stim qs
+
     [pre_stim_qs_rt, pre_stim_qs_resp] = AskQs(...
            pre_stimulus_questions,...
            pre_stimulus_questions_pos,...
@@ -321,9 +320,8 @@ for i = 1:ntrials %iterate through movies...
     vidstart = GetSecs - anchor;
     flip_time = Screen('Flip',windowptr);
     if(current_trial.video_trial)
-        %% play videos
         video_start_time = 10;
-        video_duration = stimulus_duration;
+        video_duration = 1;
         questions = poststimqs_video;
         post_stim_positions = poststimqs_pos;
         PlayVideo(...
@@ -336,33 +334,17 @@ for i = 1:ntrials %iterate through movies...
             video_start_time,...
             video_duration);
     else
-        %% set up pain task
         questions = poststimqs_pain;
         post_stim_positions = poststimqs_pos_pain;
-        pain_level = str2num(current_trial.stimulus);%may need to add round to the intensity
-        pain_duration = stimulus_duration; %possibly make more dynamic
-        
-        
+        pain_level = current_trial.stimulus;
+        pain_duration = 1; %possibly make more dynamic
         pain_string = sprintf('PAIN: Intensity: %s', pain_level);
         DrawFormattedText(windowptr, pain_string, 'center', 'center');% 
-        
-        %pain stimulation
-        eval(['fwrite(t, ''' sprintf('%04d',pain_level) ',' sprintf('%04d',pain_duration) ',t'');']);
-        
         [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
         WaitSecs(pain_duration);
-        
-        %% only time I see that R is used
-%         message_1 = deblank(fscanf(r));
-%         if strcmp(message_1,'Read Error')
-%             error(message_1);
-%         end
-%         
-        
 
     end
     vidend = GetSecs - anchor;
-    %% ask post stim qs
     [RESP_psqs,RT_psqs]= AskQs(...
                 questions,...
                 post_stim_positions,...
@@ -387,15 +369,12 @@ for i = 1:ntrials %iterate through movies...
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
 
     WaitSecs(inbtwtime); %delay before movie.
-    
-    %% log values
     imVal = 1;
     predVal = 1;
     fprintf(fid,'%s %d %d %d %1.3f %1.3f ',current_trial.stimulus,condition,imVal,predVal,wordStart, wordEnd);
     %log expected fear rating and rt
     fprintf(fid,'%1.3f %1.3f ',pre_stim_qs_resp(1),pre_stim_qs_rt(1));
     fprintf(fid,'%1.3f %1.3f ',vidstart,vidend);
-    %log post stimulus questions and reaction times
     fprintf(fid,'%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f\n',RESP_psqs,RT_psqs);
 end  
 
@@ -409,13 +388,8 @@ WaitSecs(afterTime);
 fclose(fid);
 DrawFormattedText(windowptr, 'This part is complete.', 'center', 'center');%Draw text
 Screen('Flip', windowptr);%Displays screen
-WaitSecs(5);
+WaitSecs(10);
 Screen('CloseAll');
-
-%% close pain ports
-fclose(t);
-fclose(r);
-
 clear all;
 
 

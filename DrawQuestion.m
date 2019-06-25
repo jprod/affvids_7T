@@ -1,10 +1,9 @@
 function [reaction_time,q_resp] = DrawQuestion(question, question_pos, poles,poles_pos,...
                                             ycenter, right_LineEdge,left_LineEdge, line_vert,...
                                             top_all,bottom_all, markercolor,markercenter, size_marker,...
-                                            windowptr, RateOnset,mvfac,left_High)
+                                            windowptr, RateOnset,mvfac,left_High, response_duration)
     mouseclick = [0,0,0];
     keyIsDown = 0;
-    response_duration = 3;
     q_resp = nan;
     while ~keyIsDown && GetSecs - RateOnset < response_duration,  %or a certain amount of time has passed, say 4 seconds. if 4secs have passed, then NaN response
         [x,y,mouseclick] = GetMouse();%checks position of mouse
