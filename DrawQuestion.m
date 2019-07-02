@@ -64,6 +64,8 @@ function [reaction_time,q_resp] = DrawQuestion(question, question_pos, poles,pol
         reaction_time= nan;
         q_resp = nan;
     end
+    
+    
         
 end
 

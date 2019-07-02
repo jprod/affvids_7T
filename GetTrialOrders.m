@@ -1,7 +1,6 @@
 function [trials] = GetTrialOrders(spider_videos,height_videos, pain_stims,n_trials)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-    num_stimuli_per_category =size(spider_videos,2);
+
+    num_stimuli_per_category =size(spider_videos,1);
     stimuli_per_cat_per_trial = num_stimuli_per_category/n_trials;
 
     stim_in_trial = ones(n_trials,stimuli_per_cat_per_trial);
@@ -39,8 +38,8 @@ function trial_order = CreateTrialOrder(...
                                         stimuli_per_cat_per_trial,...
                                         num_cat)
 
-    spider_vids = spider_videos(trial_stim_idx);
-    height_vids = height_videos(trial_stim_idx);
+    spider_vids = spider_videos(trial_stim_idx, :);
+    height_vids = height_videos(trial_stim_idx, :);
     pain_stims = sorted_pain(trial_stim_idx);
 
     %order of stimuli in each category for each trial - randomized
@@ -52,11 +51,22 @@ function trial_order = CreateTrialOrder(...
     trial_order = [];
     for i=1:stimuli_per_cat_per_trial
         
-        spider_vid = spider_vids(spider_order(i));
-        height_vid = height_vids(height_order(i));
-        pain_stim = pain_stims(pain_order(i));
+        spider.stimulus= spider_vids(spider_order(i),1);
+        spider.start = spider_vids(spider_order(i),2);
+        spider.video_trial = true;
+        spider.condition = 2;
+        
+        height.stimulus = height_vids(height_order(i),1);
+        height.start = height_vids(height_order(i),2);
+        height.video_trial = true;
+        height.condition = 1;
+        
+        pain.stimulus = pain_stims(pain_order(i));
+        pain.start = nan;
+        pain.video_trial = false;
+        pain.condition = 3;
 
-        block_stim = [spider_vid height_vid pain_stim];
+        block_stim = [spider height pain];
         randomized_block_stim = block_stim(randperm(num_cat));
         trial_order = [trial_order randomized_block_stim];
     end
