@@ -14,8 +14,6 @@ mvfac = 120;%mouse sensitivity
 response_duration = 4;%how long do people get to respond to the questions
 stimulus_duration = 5; %how long do pain and videos last
 
-
-
 cue_durationArraySp = [8,8.5,9.5,10];%cue time for spiders
 cue_durationArrayPain = [8,8.5,9.5,10];%cue time for pains
 cue_durationArrayHe = [8,8.5,9.5,10];%cue time for heights
@@ -24,17 +22,17 @@ cue_durationArraySp = cue_durationArraySp(randperm(length(cue_durationArraySp)))
 cue_durationArrayPain = cue_durationArraySp(randperm(length(cue_durationArrayPain)));
 cue_durationArrayHe = cue_durationArraySp(randperm(length(cue_durationArrayHe)));
 
-pre_stim_jitter_pain    = [2,1,2,1];%time for after trial jitter
+pre_stim_jitter_pain    = [1,1,2,2];%time for after trial jitter
 pre_stim_jitter_spiders = [1,1,2,2];
-pre_stim_jitter_heights = [2,2,1,1];
+pre_stim_jitter_heights = [1,1,2,2];
 
 pre_stim_jitter_pain    = pre_stim_jitter_pain(randperm(length(pre_stim_jitter_pain)));%randomize w/ each run
 pre_stim_jitter_spiders = pre_stim_jitter_spiders(randperm(length(pre_stim_jitter_spiders)));
 pre_stim_jitter_heights = pre_stim_jitter_heights(randperm(length(pre_stim_jitter_heights)));
 
-post_stim_jitter_pain    = [2,1,2,1];%time for after trial jitter
-post_stim_jitter_spiders = [1,1,2,2];
-post_stim_jitter_heights = [2,2,1,1];
+post_stim_jitter_pain    = [1,2,2,3];%time for after trial jitter
+post_stim_jitter_spiders = [1,2,2,3];
+post_stim_jitter_heights = [1,2,2,3];
 
 post_stim_jitter_pain    = post_stim_jitter_pain(randperm(length(post_stim_jitter_pain)));%randomize w/ each run
 post_stim_jitter_spiders = post_stim_jitter_spiders(randperm(length(post_stim_jitter_spiders)));
@@ -73,9 +71,6 @@ if subject_code ~= 999,
     end
 end
 
-
-
-
 HideCursor; %ShowCursor;
 
 %initialize key press variables...
@@ -95,7 +90,8 @@ exp_screen=max(Screen('Screens'));%get screen for displaying videos
 [windowptr, window_rect] = Screen('OpenWindow', exp_screen,[], [0 0 1280 960]); %open window
 ifi=Screen('GetFlipInterval', windowptr);%get flip interval for play video methods
 grayLevel = [0 0 0];
-markercolor = 255;%marker color
+yellow = [255 255 0];
+markercolor = 255;%marker color = white
 
 Screen('FillRect',windowptr,grayLevel);
 Screen('TextSize', windowptr, 60); %Set textsize
@@ -122,14 +118,12 @@ resize_rows = round(.8*mindim);
 [nBR_high] = Screen('TextBounds',windowptr,'High');%nBR
 [nBR_U] = Screen('TextBounds',windowptr,'Unpleasant');%nBR
 [nBR_P] = Screen('TextBounds',windowptr,'Pleasant');%nBR
-[nBR_very_much] = Screen('TextBounds',windowptr,'High');%nBR
+
 pre_stimulus_questions = {'How much fear do you feel?'};
 pre_stimulus_poles = {{'Low','High'}};
 poststimqs_video = {'Fear?','Proximity?','Arousal?','Valence?'};
 poststimqs_pain = {'Fear?','Pain?','Arousal?','Valence?'};
 poststimqs_poles = {{'Low','High'}, {'Low','High'}, {'Low','High'}, {'Unpleasant','Pleasant'}};
-
-
 
 topq = round(.03*wHeight);%top of question phrase
 bottomq = topq + nBR_A(4);%bottom of question phrase
@@ -229,50 +223,7 @@ first_flip_unix = now();
 [first_flip] = Screen('Flip', windowptr);
 anchor = first_flip;
 
-fprintf(fid, 'unix: %1.6f\n', first_flip_unix);
-
-% if usetrigger == 1,
-%     while trigged == 0,
-% 
-%         [keyIsDown,secs_fromKbCheck,keyCode] = KbCheck();
-%         if keyIsDown || GetSecs() - wait_onset > 3,%if response is made
-%             %foo = KbName(keyCode);
-%             trigged = 1;
-%             [first_flip] = Screen('Flip', windowptr);
-%             %on first run set time anchors
-%             %if (run==1) - comment out for now set anchors on all runs?
-%                 first_flip_unix = now();
-%                 anchor = first_flip;
-%                 fprintf(fid, 'unix: %1.6f\n', first_flip_unix);
-%            % end - 
-% 
-%             %end
-%         end
-%         WaitSecs(.01);%Wait to avoid keypress spillover
-%     end
-% else
-%     while trigged == 0,
-%         [keyIsDown,secs_fromKbCheck,keyCode] = KbCheck();
-%         if keyIsDown,%if response is made
-%             key_pressed = KbName(keyCode)
-%             if(strcmp(key_pressed,'+'))
-%                 trigged = 1;
-%                 [anchor] = Screen('Flip', windowptr);%Displays scree
-%             end
-%             
-%         end
-%         WaitSecs(.01);%Wait to avoid keypress spillover
-%     end
-% end
-
-
 ccc = [];
-
-
-
-
-
-
 
 DrawFormattedText(windowptr, '+', 'center', 'center');
 [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
@@ -340,7 +291,7 @@ for i = 1:ntrials %iterate through movies...
            response_duration);
        
     
-    flip_time = Screen('Flip',windowptr);
+    
     %% add inter trial jitter
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [pre_stim_jitter_begin] = Screen('Flip',windowptr); %ITI blank screen
@@ -353,6 +304,8 @@ for i = 1:ntrials %iterate through movies...
         video_duration = stimulus_duration;
         questions = poststimqs_video;
         post_stim_positions = poststimqs_pos;
+        flip_time = Screen('Flip',windowptr);
+        
         PlayVideo(...
             current_trial.movie_object,...
             windowptr, ...
@@ -367,16 +320,18 @@ for i = 1:ntrials %iterate through movies...
         questions = poststimqs_pain;
         post_stim_positions = poststimqs_pos_pain;
         pain_level = round(str2num(current_trial.stimulus));%may need to add round to the intensity
-        pain_duration = stimulus_duration; %possibly make more dynamic
-        
-        pain_string = sprintf('PAIN: Intensity: %s', pain_level);
-        DrawFormattedText(windowptr, pain_string, 'center', 'center');% 
         
         %pain stimulation
-        eval(['fwrite(t, ''' sprintf('%04d',pain_level) ',' sprintf('%04d',pain_duration) ',t'');']);
+        eval(['fwrite(t, ''' sprintf('%04d',pain_level) ',' sprintf('%04d',stimulus_duration) ',t'');']);
         
+        Screen('TextColor',windowptr,yellow); %Set text color
         [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-        WaitSecs(pain_duration);
+        PresentBlinkingText(...
+                            '+',...
+                            stimulus_duration,...
+                            1/2,...
+                            windowptr)
+        Screen('TextColor',windowptr,255); %Set text color
         
         %% only time I see that R is used
 %         message_1 = deblank(fscanf(r));
@@ -446,6 +401,25 @@ clear all;
 
 
 %% helper methods
+
+
+function PresentBlinkingText(...
+    text,...
+    total_duration,...
+    per_blink_duration,...
+    window)
+    
+    start_time = GetSecs();
+    
+    while GetSecs - start_time < total_duration
+        DrawFormattedText(window, text, 'center', 'center');
+        Screen(window, 'Flip');
+        WaitSecs(per_blink_duration);
+        Screen(window, 'Flip');
+        WaitSecs(per_blink_duration);
+    end
+    
+end
 
 function PlayVideo(...
     video_obj,...

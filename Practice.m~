@@ -15,13 +15,13 @@ response_duration = 4;%how long do people get to respond to the questions
 stimulus_duration = 5; %how long do pain and videos last
 
 
-cue_durationArraySp = [9,9];%cue time for spiders
-cue_durationArrayPain = [9,9];%cue time for pains
-cue_durationArrayHe = [9,9];%cue time for heights
+ISItimeArraySp = [9,9];%cue time for spiders
+ISItimeArrayPain = [9,9];%cue time for pains
+ISItimeArrayHe = [9,9];%cue time for heights
 
-cue_durationArraySp = cue_durationArraySp(randperm(length(cue_durationArraySp)));%randomize w/ each run
-cue_durationArrayPain = cue_durationArraySp(randperm(length(cue_durationArrayPain)));
-cue_durationArrayHe = cue_durationArraySp(randperm(length(cue_durationArrayHe)));
+ISItimeArraySp = ISItimeArraySp(randperm(length(ISItimeArraySp)));%randomize w/ each run
+ISItimeArrayPain = ISItimeArraySp(randperm(length(ISItimeArrayPain)));
+ISItimeArrayHe = ISItimeArraySp(randperm(length(ISItimeArrayHe)));
 
 
 pre_stim_jitter_pain    = [1.5,1.5];%time for after trial jitter
@@ -245,36 +245,35 @@ for i = 1:ntrials %iterate through trials...
     
     fprintf(fid,'START TIME: %1.3f\n',GetSecs - anchor);%print start time to file
     
-    if condition == 1
+    if condition == 1%heights
         
-        cue_duration = cue_durationArrayHe(hePlace);
+        ISItime = ISItimeArrayHe(hePlace);
         post_trial_jitter = post_stim_jitter_heights(hePlace);
-        pre_stim_jitter = pre_stim_jitter_heights(hePlace);
         hePlace = hePlace +1;
         DrawFormattedText(windowptr, 'H', 'center', 'center');
         
-    elseif condition == 2
+    elseif condition == 2%pain
         
-        cue_duration = cue_durationArraySp(spPlace);
-        post_trial_jitter = post_stim_jitter_spiders(spPlace);
-        pre_stim_jitter = pre_stim_jitter_spiders(spPlace);
-        DrawFormattedText(windowptr, 'S', 'center', 'center');
-        spPlace = spPlace +1;
-        
-    else
-        
-        cue_duration = cue_durationArrayPain(painPlace);
+        ISItime = ISItimeArrayPain(painPlace);
         post_trial_jitter = post_stim_jitter_pain(painPlace);
-        pre_stim_jitter = pre_stim_jitter_pain(painPlace);
         DrawFormattedText(windowptr, 'P', 'center', 'center');
         painPlace = painPlace +1;
+        
+        
+        
+    else%spiders
+        
+        ISItime = ISItimeArraySp(spPlace);
+        post_trial_jitter = post_stim_jitter_spiders(spPlace);
+        DrawFormattedText(windowptr, 'S', 'center', 'center');
+        spPlace = spPlace +1;
         
     end
 
 
     [CueWordOnset] = Screen('Flip',windowptr); %cue word
     wordStart = CueWordOnset - anchor;
-    WaitSecs(cue_duration);
+    WaitSecs(ISItime);
     wordEnd = GetSecs() - anchor;
     
     %% ask pre stim qs
@@ -312,7 +311,7 @@ for i = 1:ntrials %iterate through trials...
         post_stim_positions = poststimqs_pos;
         flip_time = Screen('Flip',windowptr);
         
-        PlayVideo(...
+        \PlayVideo(...
             current_trial.movie_object,...
             windowptr, ...
             window_rect,...

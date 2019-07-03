@@ -14,27 +14,25 @@ mvfac = 120;%mouse sensitivity
 response_duration = 4;%how long do people get to respond to the questions
 stimulus_duration = 5; %how long do pain and videos last
 
-
-cue_durationArraySp = [9,9];%cue time for spiders
-cue_durationArrayPain = [9,9];%cue time for pains
-cue_durationArrayHe = [9,9];%cue time for heights
+cue_durationArraySp = [8,8.5,9.5,10];%cue time for spiders
+cue_durationArrayPain = [8,8.5,9.5,10];%cue time for pains
+cue_durationArrayHe = [8,8.5,9.5,10];%cue time for heights
 
 cue_durationArraySp = cue_durationArraySp(randperm(length(cue_durationArraySp)));%randomize w/ each run
 cue_durationArrayPain = cue_durationArraySp(randperm(length(cue_durationArrayPain)));
 cue_durationArrayHe = cue_durationArraySp(randperm(length(cue_durationArrayHe)));
 
-
-pre_stim_jitter_pain    = [1.5,1.5];%time for after trial jitter
-pre_stim_jitter_spiders = [1.5,1.5];
-pre_stim_jitter_heights = [1.5,1.5];
+pre_stim_jitter_pain    = [1,1,2,2];%time for after trial jitter
+pre_stim_jitter_spiders = [1,1,2,2];
+pre_stim_jitter_heights = [1,1,2,2];
 
 pre_stim_jitter_pain    = pre_stim_jitter_pain(randperm(length(pre_stim_jitter_pain)));%randomize w/ each run
 pre_stim_jitter_spiders = pre_stim_jitter_spiders(randperm(length(pre_stim_jitter_spiders)));
 pre_stim_jitter_heights = pre_stim_jitter_heights(randperm(length(pre_stim_jitter_heights)));
 
-post_stim_jitter_pain    = [2,2];%time for after trial jitter
-post_stim_jitter_spiders = [2,2];
-post_stim_jitter_heights = [2,2];
+post_stim_jitter_pain    = [1,2,2,3];%time for after trial jitter
+post_stim_jitter_spiders = [1,2,2,3];
+post_stim_jitter_heights = [1,2,2,3];
 
 post_stim_jitter_pain    = post_stim_jitter_pain(randperm(length(post_stim_jitter_pain)));%randomize w/ each run
 post_stim_jitter_spiders = post_stim_jitter_spiders(randperm(length(post_stim_jitter_spiders)));
@@ -55,7 +53,7 @@ run = input('Enter run number: ','s');
 run = str2num(run);
 
 %create log files
-logfile = sprintf('data/AffVids_practice_file_%d.txt',subject_code);
+logfile = sprintf('data/AffVids_conceptual_practice_logfile_%d.txt',subject_code);
 
 
 %check if log file already exists
@@ -72,9 +70,6 @@ if subject_code ~= 999,
         end
     end
 end
-
-
-
 
 HideCursor; %ShowCursor;
 
@@ -96,7 +91,6 @@ exp_screen=max(Screen('Screens'));%get screen for displaying videos
 ifi=Screen('GetFlipInterval', windowptr);%get flip interval for play video methods
 grayLevel = [0 0 0];
 markercolor = 255;%marker color
-yellow = [255 255 0];
 
 Screen('FillRect',windowptr,grayLevel);
 Screen('TextSize', windowptr, 60); %Set textsize
@@ -123,14 +117,12 @@ resize_rows = round(.8*mindim);
 [nBR_high] = Screen('TextBounds',windowptr,'High');%nBR
 [nBR_U] = Screen('TextBounds',windowptr,'Unpleasant');%nBR
 [nBR_P] = Screen('TextBounds',windowptr,'Pleasant');%nBR
-[nBR_very_much] = Screen('TextBounds',windowptr,'High');%nBR
+
 pre_stimulus_questions = {'How much fear do you feel?'};
 pre_stimulus_poles = {{'Low','High'}};
 poststimqs_video = {'Fear?','Proximity?','Arousal?','Valence?'};
 poststimqs_pain = {'Fear?','Pain?','Arousal?','Valence?'};
 poststimqs_poles = {{'Low','High'}, {'Low','High'}, {'Low','High'}, {'Unpleasant','Pleasant'}};
-
-
 
 topq = round(.03*wHeight);%top of question phrase
 bottomq = topq + nBR_A(4);%bottom of question phrase
@@ -170,42 +162,12 @@ pre_stimulus_poles_pos = [left_Low, left_Low];
 %% get trials or trial order info
 if run == 1 
     % get trial order info
-    run_trial_list_practice = TrialSplitPractice();%get stimuluslistssc
-    vidlogfile = sprintf('data/AffVids_practice_vid_log_file_%d.mat',subject_code);%and save here
-    save(vidlogfile,'run_trial_list_practice');
-else
-    error('this should not happen we are in the practice');
+    [spider_videos, heights_videos, pain_stims] = TrialSplit2();%get stimuluslistssc
+    run_trial_list = GetTrialOrders(spider_videos, heights_videos, pain_stims, 5);
 end
 
-trials_struct = run_trial_list_practice(run,:);
+trials_struct = run_trial_list(run,:);
 
-%% set up ports - taken directly from setupPPD - PAIN DEVICE
-delete(instrfindall) %clear out old channels
-
-%localhost
-t=udp('localhost',61557);
-
-%udp(RemoteHost,RemotePort) creates a UDP object with the specified remote port value, RemotePort. If not specified, the default remote port is 9090.
-r=udp('localhost',61158,'localport', 61556); % this is the port that seems to be read from
-
-fopen(t);
-fopen(r);
-fwrite(t, '0005,0010,o'); % open the remote channel
-%% load videos
-for i = 1:numel(trials_struct)      %length(VIDEO_ID),
-    try
-        if(trials_struct(i).video_trial)
-            video_path = [studydir,sprintf('/REAL_VIDEOS/%s', trials_struct(i).stimulus)];
-            trials_struct(i).movie_object = VideoReader(video_path);
-        end
-    catch e
-        sca
-        Screen('CloseAll');
-        fprintf(1,'There was an error! The message was:\n%s',e.message);
-        fprintf('\n\n %s \n\n', trials_struct(i).stimulus);
-        break;
-    end
-end
 %Set up stimulus presentation order
 ntrials = numel(trials_struct); %length(movie);   %VIDEO_ID);
 %% begin task
@@ -214,37 +176,19 @@ Screen('Flip',windowptr); %show instruction
 DrawFormattedText(windowptr, '+', 'center', 'center');
 
 trigged = 0;
-wait_onset = GetSecs();
-
-key.ttl = KbName('=+');
-
-keycode(key.ttl) = 0;
-while keycode(key.ttl) == 0
-    [presstime, keycode, delta] = KbWait(-1);
-end
-
-first_flip_unix = now();
-[first_flip] = Screen('Flip', windowptr);
-anchor = first_flip;
-
-
-
-
+WaitSecs(5);
 ccc = [];
 
 DrawFormattedText(windowptr, '+', 'center', 'center');
-[StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
+[anchor] = Screen('Flip',windowptr); %ITI blank screen
 WaitSecs(1.5); %delay before movie.
 
-
 %% BEGIN trials for this run
-for i = 1:ntrials %iterate through trials...
+for i = 1:ntrials %iterate through movies...
     
     current_trial = trials_struct(i);
     condition = current_trial.condition;
-    
-    fprintf(fid,'START TIME: %1.3f\n',GetSecs - anchor);%print start time to file
-    
+
     if condition == 1
         
         cue_duration = cue_durationArrayHe(hePlace);
@@ -252,6 +196,9 @@ for i = 1:ntrials %iterate through trials...
         pre_stim_jitter = pre_stim_jitter_heights(hePlace);
         hePlace = hePlace +1;
         DrawFormattedText(windowptr, 'H', 'center', 'center');
+        text = 'Heights Video';
+        questions = poststimqs_video;
+        post_stim_positions = poststimqs_pos;
         
     elseif condition == 2
         
@@ -260,6 +207,9 @@ for i = 1:ntrials %iterate through trials...
         pre_stim_jitter = pre_stim_jitter_spiders(spPlace);
         DrawFormattedText(windowptr, 'S', 'center', 'center');
         spPlace = spPlace +1;
+        text = 'Spider Video';
+        questions = poststimqs_video;
+        post_stim_positions = poststimqs_pos;
         
     else
         
@@ -268,6 +218,9 @@ for i = 1:ntrials %iterate through trials...
         pre_stim_jitter = pre_stim_jitter_pain(painPlace);
         DrawFormattedText(windowptr, 'P', 'center', 'center');
         painPlace = painPlace +1;
+        text = 'Pressure';
+        questions = poststimqs_pain;
+        post_stim_positions = poststimqs_pos_pain;
         
     end
 
@@ -299,57 +252,19 @@ for i = 1:ntrials %iterate through trials...
            response_duration);
        
     
-    
+    flip_time = Screen('Flip',windowptr);
+    %% add inter trial jitter
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [pre_stim_jitter_begin] = Screen('Flip',windowptr); %ITI blank screen
     WaitSecs(pre_stim_jitter); %delay after movie.
     
     vidstart = GetSecs - anchor;
-    if(current_trial.video_trial)
         %% play videos
-        video_duration = stimulus_duration;
-        questions = poststimqs_video;
-        post_stim_positions = poststimqs_pos;
-        flip_time = Screen('Flip',windowptr);
-        
-        PlayVideo(...
-            current_trial.movie_object,...
-            windowptr, ...
-            window_rect,...
-            ifi,...
-            flip_time,...
-            1,...
-            current_trial.start,...
-            video_duration);
-    else
-        %% set up pain task
-        questions = poststimqs_pain;
-        post_stim_positions = poststimqs_pos_pain;
-        pain_level = round(str2num(current_trial.stimulus));%may need to add round to the intensity
-        pain_duration = stimulus_duration; %possibly make more dynamic
-        
-        %pain stimulation
-        eval(['fwrite(t, ''' sprintf('%04d',pain_level) ',' sprintf('%04d',pain_duration) ',t'');']);
-        
-        
-        Screen('TextColor',windowptr,yellow); %Set text color
-        [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-        PresentBlinkingText(...
-                            '+',...
-                            stimulus_duration,...
-                            1/2,...
-                            windowptr)
-        Screen('TextColor',windowptr,255); %Set text color
-        
-        %% only time I see that R is used
-%         message_1 = deblank(fscanf(r));
-%         if strcmp(message_1,'Read Error')
-%             error(message_1);
-%         end
-%         
-        
-
-    end
+    PresentBlinkingText(...
+                        text,...
+                        stimulus_duration,...
+                        stimulus_duration/10,...
+                        windowptr)
     vidend = GetSecs - anchor;
     %% ask post stim qs
     [RESP_psqs,RT_psqs]= AskQs(...
@@ -374,6 +289,7 @@ for i = 1:ntrials %iterate through trials...
 
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
+    
     WaitSecs(post_trial_jitter); %delay after movie.
     
     %% log values
@@ -407,7 +323,8 @@ fclose(r);
 clear all;
 
 
-%% helper functions
+%% helper methods
+
 function PresentBlinkingText(...
     text,...
     total_duration,...
@@ -424,36 +341,6 @@ function PresentBlinkingText(...
         WaitSecs(per_blink_duration);
     end
     
-end
-
-
-function PlayVideo(...
-    video_obj,...
-    window_ptr,...
-    win_rect,...
-    ifi,...
-    flip_time,...
-    img_scale,...
-    start_time,...
-    play_time)
-
-    frame_delay = 1/video_obj.FrameRate;
-    video_obj.CurrentTime = start_time;
-    off_screen_rect=[0 0 video_obj.Width video_obj.Height];
-    on_screen_rect=CenterRect(off_screen_rect*img_scale,win_rect);
-    
-    video_started = GetSecs();
-    duration_up = false;
-    while (hasFrame(video_obj) && ~KbCheck && ~duration_up) % while there are frames to read
-        
-        video_frame = readFrame(video_obj); % read next frame from video file
-        tex = Screen('MakeTexture', window_ptr, video_frame);
-        Screen('DrawTexture', window_ptr, tex, off_screen_rect, on_screen_rect);
-        flip_time = Screen('Flip', window_ptr, flip_time + frame_delay-ifi/2); % update at closest next frame
-        Screen('Close', tex);
-        
-        duration_up = GetSecs() - video_started > play_time;
-    end
 end
 
 function [RESP_psqs, RT_psqs] = AskQs(...
@@ -512,4 +399,3 @@ function [RESP_psqs, RT_psqs] = AskQs(...
         WaitSecs(.25); %prevent keyboard spillover
     end
 end
-

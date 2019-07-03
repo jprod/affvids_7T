@@ -2,7 +2,7 @@ function [calibration_sequence] = TrialSplitPractice()
     
     spider_start_times = [2;9];
     spider_vids = ["Spider_6.mov";"Spider_19.mov"];
-    spider_condition = ones(2,1) * 3;
+    spider_condition = ones(2,1) * 2;
     
     heights_start_times = [9;14];
     heights_vids = ["Heights_6.mp4";"Heights_19.m4v";];
@@ -13,7 +13,7 @@ function [calibration_sequence] = TrialSplitPractice()
     pain_stim = [pain_high;pain_low;];
     pain_stim = string(pain_stim);
     pain_start_time = nan(2,1);
-    pain_condition = ones(2,1) * 2;
+    pain_condition = ones(2,1) * 3;
     
     table_name_list = {'stimulus','start_times','condition'};
     
