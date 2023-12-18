@@ -1,26 +1,26 @@
 function [spider_vids, heights_vids, pain_stim] = TrialSplit2()
 
-    spider_start_times = [16;
+    spider_start_times = [  14;
                             10;
-                            4;
+                            3;
+                            6;
+                            6;
+                           %2;
+                            2;
+                            3;
+                            9;
                             11;
                             8;
-                           %2;
-                            3;
-                            3;
-                            11;
-                            14;
-                            9;
                             %11;
                             %16;
-                            6;
-                            15;
-                            8;
                             5;
+                            13;
+                            6;
                             3;
+                            8;
                             %11;
-                            15;
-                            9;
+                            13;
+                            8;
                              9;
                              7;
                              9 ...
@@ -52,21 +52,21 @@ function [spider_vids, heights_vids, pain_stim] = TrialSplit2()
                     "Spider_24.m4v";...      
         ];
     
-                   heights_start_times = [ 14;
+                   heights_start_times = [ 2;
+                                            15;
                                             10;
-                                            3;
                                             6;
-                                            6;
-                                            %2
-                                            2;
-                                            3;
-                                            9;
                                             11;
-                                            8;
+                                            %2
+                                            11;
+                                            3;
+                                            12;
+                                            11;
+                                            7;
                                             %9;
                                             %14;
-                                            5;
                                             13;
+                                            10;
                                             6;
                                             3;
                                             8;
@@ -107,8 +107,8 @@ function [spider_vids, heights_vids, pain_stim] = TrialSplit2()
     heights_vids = horzcat(heights_vids, heights_start_times);
     
     %need to concatenate video start times
-    pain_low = normrnd(2,.5,10,1);
-    pain_high = normrnd(6,.5,10,1);
+    pain_low  = [2;2;2;2;3;3;3;3;4;4;4;4];
+    pain_high = [5;5;5;5;6;6;6;6;7;7;7;7];
     pain_stim = sort([pain_low;pain_high]);
     pain_stim = string(pain_stim);
     

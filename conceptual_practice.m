@@ -87,7 +87,7 @@ instscrns = {'Beginning_Slide.jpg'};
 
 %% set up psych tool box and get dimensions for later display
 exp_screen=max(Screen('Screens'));%get screen for displaying videos
-[windowptr, window_rect] = Screen('OpenWindow', exp_screen,[], [0 0 1280 960]); %open window
+[windowptr, window_rect] = Screen('OpenWindow', exp_screen);%,[], [0 0 1280 960]); %open window
 ifi=Screen('GetFlipInterval', windowptr);%get flip interval for play video methods
 grayLevel = [0 0 0];
 markercolor = 255;%marker color
@@ -106,7 +106,7 @@ mindim = min([wWidth wHeight]);
 resize_cols = round(.8*mindim);
 resize_rows = round(.8*mindim);
 
-[nBR_A] = Screen('TextBounds',windowptr,'How much fear do you feel?');%Gets boundary of rectangle containing text.
+[nBR_A] = Screen('TextBounds',windowptr,'Fear?');%Gets boundary of rectangle containing text.
 [nBR_F] = Screen('TextBounds',windowptr,'Fear?');%Gets boundary of rectangle containing text.     
 [nBR_Proximity] = Screen('TextBounds',windowptr,'Proximity?');%Gets boundary of rectangle containing text.
 [nBR_Pain] = Screen('TextBounds',windowptr,'Pain?');%Gets boundary of rectangle containing text.
@@ -118,10 +118,10 @@ resize_rows = round(.8*mindim);
 [nBR_U] = Screen('TextBounds',windowptr,'Unpleasant');%nBR
 [nBR_P] = Screen('TextBounds',windowptr,'Pleasant');%nBR
 
-pre_stimulus_questions = {'How much fear do you feel?'};
+pre_stimulus_questions = {'Fear?'};
 pre_stimulus_poles = {{'Low','High'}};
-poststimqs_video = {'Fear?','Proximity?','Arousal?','Valence?'};
-poststimqs_pain = {'Fear?','Pain?','Arousal?','Valence?'};
+poststimqs_video = {'Fear?','Proximity?','Activation?','Valence?'};
+poststimqs_pain = {'Fear?','Pain?','Activation?','Valence?'};
 poststimqs_poles = {{'Low','High'}, {'Low','High'}, {'Low','High'}, {'Unpleasant','Pleasant'}};
 
 topq = round(.03*wHeight);%top of question phrase
@@ -184,7 +184,7 @@ DrawFormattedText(windowptr, '+', 'center', 'center');
 WaitSecs(1.5); %delay before movie.
 
 %% BEGIN trials for this run
-for i = 1:ntrials %iterate through movies...
+for i = 1:(ntrials/2) %iterate through movies...
     
     current_trial = trials_struct(i);
     condition = current_trial.condition;
@@ -315,10 +315,6 @@ DrawFormattedText(windowptr, 'This part is complete.', 'center', 'center');%Draw
 Screen('Flip', windowptr);%Displays screen
 WaitSecs(5);
 Screen('CloseAll');
-
-%% close pain ports
-fclose(t);
-fclose(r);
 
 clear all;
 

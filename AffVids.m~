@@ -10,9 +10,10 @@ studydir = pwd;%make sure you're in the right directory!
 cd(studydir);
 
 %% Timing variables
-mvfac = 120;%mouse sensitivity
+mvfac = 125;%mouse sensitivity
 response_duration = 4;%how long do people get to respond to the questions
 stimulus_duration = 5; %how long do pain and videos last
+pain_subtracter = 0;
 
 cue_durationArraySp = [8,8.5,9.5,10];%cue time for spiders
 cue_durationArrayPain = [8,8.5,9.5,10];%cue time for pains
@@ -87,10 +88,11 @@ instscrns = {'Beginning_Slide.jpg'};
 
 %% set up psych tool box and get dimensions for later display
 exp_screen=max(Screen('Screens'));%get screen for displaying videos
-[windowptr, window_rect] = Screen('OpenWindow', exp_screen,[], [0 0 1280 960]); %open window
+[windowptr, window_rect] = Screen('OpenWindow', exp_screen)%,[], [0 0 1280 960]); %open window
 ifi=Screen('GetFlipInterval', windowptr);%get flip interval for play video methods
 grayLevel = [0 0 0];
-markercolor = 255;%marker color
+yellow = [255 255 0];
+markercolor = 255;%marker color = white
 
 Screen('FillRect',windowptr,grayLevel);
 Screen('TextSize', windowptr, 60); %Set textsize
@@ -106,7 +108,7 @@ mindim = min([wWidth wHeight]);
 resize_cols = round(.8*mindim);
 resize_rows = round(.8*mindim);
 
-[nBR_A] = Screen('TextBounds',windowptr,'How much fear do you feel?');%Gets boundary of rectangle containing text.
+[nBR_A] = Screen('TextBounds',windowptr,'Fear?');%Gets boundary of rectangle containing text.
 [nBR_F] = Screen('TextBounds',windowptr,'Fear?');%Gets boundary of rectangle containing text.     
 [nBR_Proximity] = Screen('TextBounds',windowptr,'Proximity?');%Gets boundary of rectangle containing text.
 [nBR_Pain] = Screen('TextBounds',windowptr,'Pain?');%Gets boundary of rectangle containing text.
@@ -118,7 +120,7 @@ resize_rows = round(.8*mindim);
 [nBR_U] = Screen('TextBounds',windowptr,'Unpleasant');%nBR
 [nBR_P] = Screen('TextBounds',windowptr,'Pleasant');%nBR
 
-pre_stimulus_questions = {'How much fear do you feel?'};
+pre_stimulus_questions = {'Fear?'};
 pre_stimulus_poles = {{'Low','High'}};
 poststimqs_video = {'Fear?','Proximity?','Arousal?','Valence?'};
 poststimqs_pain = {'Fear?','Pain?','Arousal?','Valence?'};
@@ -218,9 +220,9 @@ while keycode(key.ttl) == 0
     [presstime, keycode, delta] = KbWait(-1);
 end
 
-first_flip_unix = now();
-[first_flip] = Screen('Flip', windowptr);
-anchor = first_flip;
+%first_flip_unix = now();
+%[first_flip] = Screen('Flip', windowptr);
+anchor = presstime;
 
 ccc = [];
 
@@ -238,35 +240,40 @@ for i = 1:ntrials %iterate through movies...
 
     if condition == 1
         
-        cue_duration = cue_durationArrayHe(hePlace);
+        cue_duration      = cue_durationArrayHe(hePlace);
         post_trial_jitter = post_stim_jitter_heights(hePlace);
-        pre_stim_jitter = pre_stim_jitter_heights(hePlace);
-        hePlace = hePlace +1;
+        pre_stim_jitter   = pre_stim_jitter_heights(hePlace);
+        hePlace           = hePlace + 1;
+        
         DrawFormattedText(windowptr, 'H', 'center', 'center');
         
     elseif condition == 2
         
-        cue_duration = cue_durationArraySp(spPlace);
+        cue_duration      = cue_durationArraySp(spPlace);
         post_trial_jitter = post_stim_jitter_spiders(spPlace);
-        pre_stim_jitter = pre_stim_jitter_spiders(spPlace);
+        pre_stim_jitter   = pre_stim_jitter_spiders(spPlace);
+        spPlace           = spPlace +1;
+        
         DrawFormattedText(windowptr, 'S', 'center', 'center');
-        spPlace = spPlace +1;
+        
         
     else
         
-        cue_duration = cue_durationArrayPain(painPlace);
+        cue_duration      = cue_durationArrayPain(painPlace);
         post_trial_jitter = post_stim_jitter_pain(painPlace);
-        pre_stim_jitter = pre_stim_jitter_pain(painPlace);
+        pre_stim_jitter   = pre_stim_jitter_pain(painPlace);
+        painPlace         = painPlace +1;
+        
         DrawFormattedText(windowptr, 'P', 'center', 'center');
-        painPlace = painPlace +1;
+        
         
     end
 
 
     [CueWordOnset] = Screen('Flip',windowptr); %cue word
-    wordStart = CueWordOnset - anchor;
+    wordStart      = CueWordOnset - anchor;
     WaitSecs(cue_duration);
-    wordEnd = GetSecs() - anchor;
+    wordEnd        = GetSecs() - anchor;
     
     %% ask pre stim qs
     [pre_stim_qs_rt, pre_stim_qs_resp] = AskQs(...
@@ -290,7 +297,7 @@ for i = 1:ntrials %iterate through movies...
            response_duration);
        
     
-    flip_time = Screen('Flip',windowptr);
+    
     %% add inter trial jitter
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [pre_stim_jitter_begin] = Screen('Flip',windowptr); %ITI blank screen
@@ -300,9 +307,11 @@ for i = 1:ntrials %iterate through movies...
     if(current_trial.video_trial)
         %% play videos
         video_start_time = str2double(current_trial.start);
-        video_duration = stimulus_duration;
-        questions = poststimqs_video;
+        video_duration   = stimulus_duration;
+        questions        = poststimqs_video;
         post_stim_positions = poststimqs_pos;
+        flip_time = Screen('Flip',windowptr);
+        
         PlayVideo(...
             current_trial.movie_object,...
             windowptr, ...
@@ -316,26 +325,19 @@ for i = 1:ntrials %iterate through movies...
         %% set up pain task
         questions = poststimqs_pain;
         post_stim_positions = poststimqs_pos_pain;
-        pain_level = round(str2num(current_trial.stimulus));%may need to add round to the intensity
-        pain_duration = stimulus_duration; %possibly make more dynamic
-        
-        
-        pain_string = sprintf('PAIN: Intensity: %s', pain_level);
-        DrawFormattedText(windowptr, pain_string, 'center', 'center');% 
+        pain_level = round(str2num(current_trial.stimulus))-pain_subtracter;%may need to add round to the intensity
         
         %pain stimulation
-        eval(['fwrite(t, ''' sprintf('%04d',pain_level) ',' sprintf('%04d',pain_duration) ',t'');']);
+        eval(['fwrite(t, ''' sprintf('%04d',pain_level) ',' sprintf('%04d',stimulus_duration) ',t'');']);
         
+        Screen('TextColor',windowptr,yellow); %Set text color
         [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-        
         PresentBlinkingText(...
                             '+',...
-                            
-                            pain_duration,...
+                            stimulus_duration,...
                             1/2,...
-                            window,...
-                            )
-        
+                            windowptr)
+        Screen('TextColor',windowptr,255); %Set text color
         
         %% only time I see that R is used
 %         message_1 = deblank(fscanf(r));
@@ -476,6 +478,7 @@ function [RESP_psqs, RT_psqs] = AskQs(...
             
     RESP_psqs = NaN(1,numel(questions));
     RT_psqs = NaN(1,numel(questions));
+    rate_onset_psqs = NaN(1,numel(questions));
     for ii = 1:numel(questions),
 
         SetMouse(xcen,ycenter,windowptr);
@@ -506,6 +509,7 @@ function [RESP_psqs, RT_psqs] = AskQs(...
 
         RESP_psqs(ii) = q_resp;
         RT_psqs(ii) = reaction_time;
+        rat
 
         WaitSecs(.25); %prevent keyboard spillover
     end

@@ -112,7 +112,7 @@ mindim = min([wWidth wHeight]);
 resize_cols = round(.8*mindim);
 resize_rows = round(.8*mindim);
 
-[nBR_A] = Screen('TextBounds',windowptr,'How much fear do you feel?');%Gets boundary of rectangle containing text.
+[nBR_A] = Screen('TextBounds',windowptr,'Fear?');%Gets boundary of rectangle containing text.
 [nBR_F] = Screen('TextBounds',windowptr,'Fear?');%Gets boundary of rectangle containing text.     
 [nBR_Proximity] = Screen('TextBounds',windowptr,'Proximity?');%Gets boundary of rectangle containing text.
 [nBR_Pain] = Screen('TextBounds',windowptr,'Pain?');%Gets boundary of rectangle containing text.
@@ -126,8 +126,8 @@ resize_rows = round(.8*mindim);
 [nBR_very_much] = Screen('TextBounds',windowptr,'High');%nBR
 pre_stimulus_questions = {'How much fear do you feel?'};
 pre_stimulus_poles = {{'Low','High'}};
-poststimqs_video = {'Fear?','Proximity?','Arousal?','Valence?'};
-poststimqs_pain = {'Fear?','Pain?','Arousal?','Valence?'};
+poststimqs_video = {'Fear?','Proximity?','Activation?','Valence?'};
+poststimqs_pain = {'Fear?','Pain?','Activation?','Valence?'};
 poststimqs_poles = {{'Low','High'}, {'Low','High'}, {'Low','High'}, {'Unpleasant','Pleasant'}};
 
 
@@ -243,8 +243,6 @@ for i = 1:ntrials %iterate through trials...
     current_trial = trials_struct(i);
     condition = current_trial.condition;
     
-    fprintf(fid,'START TIME: %1.3f\n',GetSecs - anchor);%print start time to file
-    
     if condition == 1
         
         cue_duration = cue_durationArrayHe(hePlace);
@@ -278,7 +276,7 @@ for i = 1:ntrials %iterate through trials...
     wordEnd = GetSecs() - anchor;
     
     %% ask pre stim qs
-    [pre_stim_qs_rt, pre_stim_qs_resp] = AskQs(...
+    [pre_stim_qs_rt, pre_stim_qs_resp, pre_stim_qs_onset] = AskQs(...
            pre_stimulus_questions,...
            pre_stimulus_questions_pos,...
            pre_stimulus_poles,...
@@ -297,6 +295,7 @@ for i = 1:ntrials %iterate through trials...
            mvfac,...
            left_High,...
            response_duration);
+    pre_stim_qs_onset = pre_stim_qs_onset - anchor;
        
     
     
@@ -352,7 +351,7 @@ for i = 1:ntrials %iterate through trials...
     end
     vidend = GetSecs - anchor;
     %% ask post stim qs
-    [RESP_psqs,RT_psqs]= AskQs(...
+    [RESP_psqs,RT_psqs, ONSET_psqs]= AskQs(...
                 questions,...
                 post_stim_positions,...
                 poststimqs_poles,...
@@ -371,20 +370,24 @@ for i = 1:ntrials %iterate through trials...
                 mvfac, ...
                 left_High,...
                 response_duration);
+    ONSET_psqs = ONSET_psqs - anchor;
 
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
     WaitSecs(post_trial_jitter); %delay after movie.
     
-    %% log values
+     %% log values
     imVal = 1;
     predVal = 1;
     fprintf(fid,'%s %d %d %d %1.3f %1.3f ',current_trial.stimulus,condition,imVal,predVal,wordStart, wordEnd);
     %log expected fear rating and rt
-    fprintf(fid,'%1.3f %1.3f ',pre_stim_qs_resp(1),pre_stim_qs_rt(1));
+    fprintf(fid,'%1.3f %1.3f %1.3f ',pre_stim_qs_onset(1), pre_stim_qs_resp(1),pre_stim_qs_rt(1));
     fprintf(fid,'%1.3f %1.3f ',vidstart,vidend);
     %log post stimulus questions and reaction times
-    fprintf(fid,'%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f\n',RESP_psqs,RT_psqs);
+    for q_index=1:numel(ONSET_psqs)
+        fprintf(fid,'%1.3f %1.3f %1.3f ',ONSET_psqs(q_index), RESP_psqs(q_index), RT_psqs(q_index));
+    end
+    fprintf(fid,'\n');
 end  
 
 
@@ -456,7 +459,7 @@ function PlayVideo(...
     end
 end
 
-function [RESP_psqs, RT_psqs] = AskQs(...
+function [RESP_psqs, RT_psqs, rate_onset_psqs] = AskQs(...
                 questions,...
                 questions_pos,...
                 questions_poles,...
@@ -478,6 +481,7 @@ function [RESP_psqs, RT_psqs] = AskQs(...
             
     RESP_psqs = NaN(1,numel(questions));
     RT_psqs = NaN(1,numel(questions));
+    rate_onset_psqs = NaN(1,numel(questions));
     for ii = 1:numel(questions),
 
         SetMouse(xcen,ycenter,windowptr);
@@ -508,8 +512,8 @@ function [RESP_psqs, RT_psqs] = AskQs(...
 
         RESP_psqs(ii) = q_resp;
         RT_psqs(ii) = reaction_time;
+        rate_onset_psqs(ii) = RateOnset;
 
         WaitSecs(.25); %prevent keyboard spillover
     end
 end
-
