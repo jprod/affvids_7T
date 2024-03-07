@@ -49,7 +49,7 @@ function [reaction_time,q_resp] = DrawQuestion(question, question_pos, poles,pol
                 WaitSecs(.1); %prevent keyboard spillover
         end
     end
-    
+
     if(~isnan(q_resp))
     %Re-Draw the screen without marker
         Screen('Drawtext',windowptr, question, question_pos,ycenter);%Displays text
@@ -65,7 +65,16 @@ function [reaction_time,q_resp] = DrawQuestion(question, question_pos, poles,pol
         q_resp = nan;
     end
     
-    
+    if ~keyIsDown
+        reaction_time = GetSecs - RateOnset;%get response time for post stimulus qs
+        resp = x; %get position of cursor
+        if resp < left_LineEdge,
+            resp = left_LineEdge;
+        elseif resp > right_LineEdge,
+            resp = right_LineEdge;
+        end
+            q_resp = (resp-left_LineEdge)/(right_LineEdge-left_LineEdge); %converted to percentage
+    end
         
 end
 
