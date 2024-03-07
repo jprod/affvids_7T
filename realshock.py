@@ -43,6 +43,8 @@ def shock(lvl):
     verbose = True
     if verbose:
         print(f"Shock with multiplier: {lvl}")
+    if lvl > 1.0:
+        raise ValueError("Shock multiplier is too large (> 1.0)")
     # By default, the example detects and displays all available devices and
     # selects the first device listed. Use the dev_id_list variable to filter
     # detected devices by device ID (see UL documentation for device IDs).
