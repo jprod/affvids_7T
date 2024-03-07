@@ -179,7 +179,7 @@ pre_stimulus_poles_pos = [left_Low, left_Low];
 if run == 1, 
     % get trial order info
     [spider_videos, heights_videos, pain_stims] = TrialSplit3();%get stimuluslistssc
-    run_trial_list = GetTrialOrders(spider_videos, heights_videos, pain_stims, 10);
+    run_trial_list = GetTrialOrders(spider_videos, heights_videos, pain_stims, 12);
     vidlogfile = sprintf('data/AffVids_vidlogfile_%d.mat',subject_code);%and save here
     save(vidlogfile,'run_trial_list');
 else
@@ -414,8 +414,8 @@ for i = 1:ntrials %iterate through movies...
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
     if condition == 3
         WaitSecs(pre_shock_jitter);
-        pain_level = convertStringsToChars(current_trial.stimulus);
-        pyrunfile(['.\shock.py ' pain_level]);
+        pain_value = convertStringsToChars(current_trial.stimulus);
+        pyrunfile(['.\shock.py ' pain_value]);
         WaitSecs(post_shock_jitter);
     else
         WaitSecs(post_trial_jitter); %delay after movie.
@@ -425,7 +425,7 @@ for i = 1:ntrials %iterate through movies...
     imVal = 1;
     predVal = 1;
     % fprintf(fid,'%s %d %d %d %1.3f %1.3f ',current_trial.stimulus,condition,imVal,predVal,wordStart, wordEnd);
-    fprintf(fid,'%s %d %d %d ',current_trial.stimulus,condition,imVal,predVal);
+    fprintf(fid,'%s %d %d %d %d ',current_trial.stimulus,current_trial.level,condition,imVal,predVal);
     %log expected fear rating and rt
     % fprintf(fid,'%1.3f %1.3f ',pre_stim_qs_resp(1),pre_stim_qs_rt(1));
     fprintf(fid,'%1.3f %1.3f ',vidstart,vidend);

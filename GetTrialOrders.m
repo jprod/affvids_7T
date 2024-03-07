@@ -1,4 +1,4 @@
-function [trials] = GetTrialOrders(spider_videos,height_videos, pain_stims,n_trials)
+function [trials] = GetTrialOrders(spider_videos,height_videos,pain_stims,n_trials)
 
     num_stimuli_per_category =size(spider_videos,1);
     stimuli_per_cat_per_trial = num_stimuli_per_category/n_trials;
@@ -53,16 +53,19 @@ function trial_order = CreateTrialOrder(...
         
         spider.stimulus= spider_vids(spider_order(i),1);
         spider.start = spider_vids(spider_order(i),2);
+        spider.level = spider_vids(spider_order(i),3);
         spider.video_trial = true;
         spider.condition = 2;
         
         height.stimulus = height_vids(height_order(i),1);
         height.start = height_vids(height_order(i),2);
+        height.level = height_vids(height_order(i),3);
         height.video_trial = true;
         height.condition = 1;
         
-        pain.stimulus = pain_stims(pain_order(i));
+        pain.stimulus = pain_stims(pain_order(i),1);
         pain.start = nan;
+        pain.level = pain_stims(pain_order(i),2);
         pain.video_trial = false;
         pain.condition = 3;
 
