@@ -179,7 +179,7 @@ pre_stimulus_poles_pos = [left_Low, left_Low];
 if run == 1, 
     % get trial order info
     [spider_videos, heights_videos, pain_stims] = TrialSplit3();%get stimuluslistssc
-    run_trial_list = GetTrialOrders(spider_videos, heights_videos, pain_stims, 12);
+    run_trial_list = GetTrialOrders(spider_videos, heights_videos, pain_stims, 5);
     vidlogfile = sprintf('data/AffVids_vidlogfile_%d.mat',subject_code);%and save here
     save(vidlogfile,'run_trial_list');
 else
@@ -387,6 +387,7 @@ for i = 1:ntrials %iterate through movies...
 
     % <===================================== SLIDE 3 - RATINGS  ========================================================>
     %% ask post stim qs
+    qonset = GetSecs - anchor;
     [RESP_psqs,RT_psqs]= AskQs(...
                 questions,...
                 post_stim_positions,...
@@ -410,6 +411,7 @@ for i = 1:ntrials %iterate through movies...
 
 
     % <===================================== SLIDE 2 - JITTER SHOCK ====================================================>
+    jitteronset = GetSecs - anchor;
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
     if condition == 3
@@ -417,18 +419,20 @@ for i = 1:ntrials %iterate through movies...
         pain_value = convertStringsToChars(current_trial.stimulus);
         pyrunfile(['.\shock.py ' pain_value]);
         WaitSecs(post_shock_jitter);
+        logstim = strcat('Pain_', current_trial.stimulus);
     else
         WaitSecs(post_trial_jitter); %delay after movie.
+        logstim = current_trial.stimulus;
     end
     
-    %% log values
-    imVal = 1;
-    predVal = 1;
+    % %% log values
+    % imVal = 1;
+    % predVal = 1;
     % fprintf(fid,'%s %d %d %d %1.3f %1.3f ',current_trial.stimulus,condition,imVal,predVal,wordStart, wordEnd);
-    fprintf(fid,'%s %d %d %d %d ',current_trial.stimulus,current_trial.level,condition,imVal,predVal);
+    fprintf(fid,'%s %s %d ',logstim,current_trial.level,condition);
     %log expected fear rating and rt
     % fprintf(fid,'%1.3f %1.3f ',pre_stim_qs_resp(1),pre_stim_qs_rt(1));
-    fprintf(fid,'%1.3f %1.3f ',vidstart,vidend);
+    fprintf(fid,'%1.3f %1.3f %1.3f %1.3f ',vidstart,vidend,qonset,jitteronset);
     %log post stimulus questions and reaction times
     fprintf(fid,[strdupe('%1.3f ', numel(questions) * 2) '\n'], RESP_psqs,RT_psqs);
 end  

@@ -1,6 +1,6 @@
 function [trials] = GetTrialOrders(spider_videos,height_videos,pain_stims,n_trials)
-
-    num_stimuli_per_category =size(spider_videos,1);
+    % trials in this script refer to runs
+    num_stimuli_per_category = size(spider_videos,1);
     stimuli_per_cat_per_trial = num_stimuli_per_category/n_trials;
 
     stim_in_trial = ones(n_trials,stimuli_per_cat_per_trial);
@@ -40,7 +40,7 @@ function trial_order = CreateTrialOrder(...
 
     spider_vids = spider_videos(trial_stim_idx, :);
     height_vids = height_videos(trial_stim_idx, :);
-    pain_stims = sorted_pain(trial_stim_idx);
+    pain_stims = sorted_pain(trial_stim_idx, :);
 
     %order of stimuli in each category for each trial - randomized
     spider_order = randperm(stimuli_per_cat_per_trial);
