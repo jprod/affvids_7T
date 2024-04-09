@@ -136,7 +136,7 @@ poststimqs_video = {'Fear?','Arousal?','Valence?'};
 % poststimqs_video = {'Fear?','Proximity?','Arousal?','Valence?'};
 poststimqs_pain = {'Fear?','Arousal?','Valence?'};
 % poststimqs_pain = {'Fear?','Pain?','Arousal?','Valence?'};
-poststimqs_poles = {{'Low','High'}, {'Low','High'}, {'Low','High'}, {'Unpleasant','Pleasant'}};
+poststimqs_poles = {{'Low','High'}, {'Low','High'}, {'Unpleasant','Pleasant'}};
 
 topq = round(.03*wHeight);%top of question phrase
 bottomq = topq + nBR_A(4);%bottom of question phrase
@@ -170,7 +170,7 @@ right_marker = xcen+(size_marker*.5);
 % poststimqs_pos_pain = xcen-[fix(nBR_F(3)/2), fix(nBR_Pain(3)/2), fix(nBR_UP(3)/2), fix(nBR_Ar(3)/2)];
 poststimqs_pos = xcen-[fix(nBR_F(3)/2), fix(nBR_UP(3)/2), fix(nBR_Ar(3)/2)];
 poststimqs_pos_pain = xcen-[fix(nBR_F(3)/2), fix(nBR_UP(3)/2), fix(nBR_Ar(3)/2)];
-poststimqs_poles_pos = [left_Low, left_Low, left_Low, left_U];
+poststimqs_poles_pos = [left_Low, left_Low, left_U];
 pre_stimulus_questions_pos = xcen-[fix(nBR_A(3)/2), fix(nBR_A(3)/2)];
 pre_stimulus_poles_pos = [left_Low, left_Low];
 
