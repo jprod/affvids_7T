@@ -177,6 +177,6 @@ def add_data(board_num, data_array, ao_range, num_chans, rate,
 
 if __name__ == '__main__':
     level = sys.argv[1]
-    if isinstance(level, str)
+    if isinstance(level, str):
         level = float(level)
     shock(level)
