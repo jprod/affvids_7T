@@ -95,7 +95,7 @@ def shock(lvl):
             raise Exception('Error: Failed to allocate memory')
 
         frequencies = add_data(board_num, ctypes_array, ao_range,
-                                       num_chans, rate, points_per_channel, verbose, multi=1.0)
+                                       num_chans, rate, points_per_channel, verbose, multi=lvl)
 
         for ch_num in range(low_chan, high_chan + 1):
             print('Channel', ch_num, 'Output Signal Frequency:',
@@ -149,8 +149,8 @@ def add_data(board_num, data_array, ao_range, num_chans, rate,
     amplitude = (ao_range.range_max - ao_range.range_min) / 2 * multi
     y_offset = (amplitude + ao_range.range_min) / 2
 
-    if amplitude > 5:
-        raise ValueError("Amplitude for shock D/A converter is too large (> 5)")
+    if amplitude > (ao_range.range_max - ao_range.range_min):
+        raise ValueError(f"Amplitude for shock D/A converter is too large (> {(ao_range.range_max - ao_range.range_min)})")
 
     print(f"amp: {amplitude}; y_offset: {y_offset}") if verbose else None
     val_array = []
