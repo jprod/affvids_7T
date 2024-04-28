@@ -1,4 +1,8 @@
 function [trials] = GetTrialOrders(spider_videos,height_videos,pain_stims,n_trials)
+    % sort to distribute intesity level (col 3) accordingly
+    spider_videos = sortrows(spider_videos,3);
+    height_videos = sortrows(height_videos,3);
+    pain_stims = sortrows(pain_stims,2);
     % trials in this script refer to runs
     num_stimuli_per_category = size(spider_videos,1);
     stimuli_per_cat_per_trial = num_stimuli_per_category/n_trials;

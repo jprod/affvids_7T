@@ -159,11 +159,11 @@ function [spider_vids, heights_vids, pain_stim, intensity_levels] = TrialSplit3(
     %need to concatenate video start times
     % pain_low  = [2;2;2;2;3;3;3;3;4;4;4;4];
     % pain_high = [5;5;5;5;6;6;6;6;7;7;7;7];
-    pain_low  = [0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5];
-    pain_high = [1;1;1;1;1;1;1;1;1;1;1;1];
+    pain_low  = [0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5;0.5];
+    pain_high = [1;1;1;1;1;1;1;1;1;1];
     pain_stim = sort([pain_low;pain_high]);
     pain_stim = string(pain_stim);
-    pain_level  = [0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1];
+    pain_level  = [0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1];
     pain_stim = horzcat(pain_stim, pain_level);
 
     heights_vids = flip(heights_vids);
