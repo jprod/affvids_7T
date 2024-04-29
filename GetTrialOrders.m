@@ -68,7 +68,7 @@ function trial_order = CreateTrialOrder(...
         height.condition = 1;
         
         pain.stimulus = pain_stims(pain_order(i),1);
-        pain.start = nan;
+        pain.start = str2num(pain_stims(pain_order(i),3));
         pain.level = pain_stims(pain_order(i),2);
         pain.video_trial = false;
         pain.condition = 3;

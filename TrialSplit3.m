@@ -164,7 +164,8 @@ function [spider_vids, heights_vids, pain_stim, intensity_levels] = TrialSplit3(
     pain_stim = sort([pain_low;pain_high]);
     pain_stim = string(pain_stim);
     pain_level  = [0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1];
-    pain_stim = horzcat(pain_stim, pain_level);
+    pain_timings  = [0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1];
+    pain_stim = horzcat(pain_stim, pain_level, pain_timings);
 
     heights_vids = flip(heights_vids);
     spider_vids = flip(spider_vids);

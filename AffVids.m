@@ -10,7 +10,8 @@ studydir = pwd;%make sure you're in the right directory!
 cd(studydir);
 
 
-% TODO: Why are these 4? Instead of 10? 
+% TODO: Why are these 4? Instead of 10? -- ANSWER: 4 for each type of
+% stimuli per category per run
 %% Timing variables
 mvfac = 125;%mouse sensitivity
 response_duration = 5;%how long do people get to respond to the questions
@@ -46,8 +47,8 @@ post_stim_jitter_spiders = post_stim_jitter_spiders(randperm(length(post_stim_ji
 post_stim_jitter_heights = post_stim_jitter_heights(randperm(length(post_stim_jitter_heights)));
 
 
-post_trial_jitterspit = [0.3,0.4,0.6,0.7];
-post_trial_jitterspit = post_stim_jitter_heights(randperm(length(post_trial_jitterspit)));
+jitter_shock_timings = [0.3,0.4,0.6,0.7];
+jitter_shock_timings = post_stim_jitter_heights(randperm(length(jitter_shock_timings)));
 
 hePlace = 1;%index of heights cue time
 painPlace = 1;% index of pain cue time
@@ -188,21 +189,7 @@ else
 end
 
 trials_struct = run_trial_list(run,:);
-%trials_struct = TrialOrder(current_run_trials);
 
-%% set up ports - taken directly from setupPPD - PAIN DEVICE
-% TODO: Rewrite for shocker
-% delete(instrfindall) %clear out old channels
-% 
-% %localhost
-% t=udpport('localhost',61557);
-% 
-% %udp(RemoteHost,RemotePort) creates a UDP object with the specified remote port value, RemotePort. If not specified, the default remote port is 9090.
-% r=udpport('localhost',61158,'localport', 61556); % this is the port that seems to be read from
-% 
-% fopen(t);
-% fopen(r);
-% fwrite(t, '0005,0010,o'); % open the remote channel
 %% load videos
 for i = 1:numel(trials_struct)      %length(VIDEO_ID),
     try
@@ -252,74 +239,39 @@ fprintf(fid,'START TIME: %1.3f\n',GetSecs - anchor);
 %% ============================================================================
 %% BEGIN trials for this run
 for i = 1:ntrials %iterate through movies...
-    
     % Set up condition vars
     current_trial = trials_struct(i);
     condition = current_trial.condition;
     if condition == 1
-        
         cue_duration      = cue_durationArrayHe(hePlace);
         post_trial_jitter = post_stim_jitter_heights(hePlace);
         pre_stim_jitter   = pre_stim_jitter_heights(hePlace);
         mid_trial_jitter  = mid_stim_jitter_heights(hePlace);
         hePlace           = hePlace + 1;
         
-        % DrawFormattedText(windowptr, 'H', 'center', 'center');
-        
     elseif condition == 2
-        
         cue_duration      = cue_durationArraySp(spPlace);
         post_trial_jitter = post_stim_jitter_spiders(spPlace);
         pre_stim_jitter   = pre_stim_jitter_spiders(spPlace);
         mid_trial_jitter  = mid_stim_jitter_spiders(spPlace);
         spPlace           = spPlace + 1;
-        
-        % DrawFormattedText(windowptr, 'S', 'center', 'center');
-        
-        
+ 
     else
-        
+        start = current_trial.start;
         cue_duration      = cue_durationArrayPain(painPlace);
         post_trial_jitter = post_stim_jitter_pain(painPlace);
         pre_stim_jitter   = pre_stim_jitter_pain(painPlace);
         mid_trial_jitter  = mid_stim_jitter_pain(painPlace);
-        post_trial_jittersplit = post_trial_jitterspit(painPlace);
-        pre_shock_jitter = post_trial_jittersplit * post_trial_jitter;
-        post_shock_jitter = (1-post_trial_jittersplit) * post_trial_jitter;
+        trial_jitter_timings = jitter_shock_timings(painPlace);
+        if start == 1
+            pre_shock_jitter = trial_jitter_timings * post_trial_jitter;
+            post_shock_jitter = (1-trial_jitter_timings) * post_trial_jitter;
+        elseif start == 0
+            pre_shock_jitter = trial_jitter_timings * mid_trial_jitter;
+            post_shock_jitter = (1-trial_jitter_timings) * mid_trial_jitter;
+        end
         painPlace         = painPlace + 1;
-        
-        % DrawFormattedText(windowptr, 'P', 'center', 'center');
-        
-        
     end
-    % [CueWordOnset] = Screen('Flip',windowptr); %cue word
-    % wordStart      = CueWordOnset - anchor;
-    % WaitSecs(cue_duration);
-    % wordEnd        = GetSecs() - anchor;
-    
-    % TODO: deprecate
-    % %% ask pre stim qs
-    % [pre_stim_qs_rt, pre_stim_qs_resp] = AskQs(...
-    %        pre_stimulus_questions,...
-    %        pre_stimulus_questions_pos,...
-    %        pre_stimulus_poles,...
-    %        pre_stimulus_poles_pos,...
-    %        ycenter,...
-    %        xcen,...
-    %        right_LineEdge,...
-    %        left_LineEdge, ...
-    %        line_vert,...
-    %        top_all,...
-    %        bottom_all,...
-    %        markercolor,...
-    %        markercenter,...
-    %        size_marker,...
-    %        windowptr,...
-    %        mvfac,...
-    %        left_High,...
-    %        response_duration);
-       
-    
     
     %% add inter trial jitter
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
@@ -356,34 +308,23 @@ for i = 1:ntrials %iterate through movies...
             DrawFormattedText(windowptr, 'Low', 'center', 'center');
         end
         [PainCueOnset] = Screen('Flip',windowptr);
-        WaitSecs(20);
-%         % pain_level = round(str2num(current_trial.stimulus))-pain_subtracter;%may need to add round to the intensity
-%         pain_level = current_trial.stimulus;
-%         pyrunfile('.\shock.py', pain_level)
-        
-%         Screen('TextColor',windowptr,yellow); %Set text color
-%         [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-%         PresentBlinkingText(...
-%                             '+',...
-%                             stimulus_duration,...
-%                             1/2,...
-%                             windowptr)
-%         Screen('TextColor',windowptr,255); %Set text color
-        
-%         %% only time I see that R is used
-% %         message_1 = deblank(fscanf(r));
-% %         if strcmp(message_1,'Read Error')
-% %             error(message_1);
-% %         end
-%         
+        WaitSecs(20);       
     end
     vidend = GetSecs - anchor;
 
-
-    % <===================================== SLIDE 2 - JITTER CROSS ====================================================>
+    % <===================================== SLIDE 2 - JITTER SHOCK ====================================================>
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-    WaitSecs(mid_trial_jitter); %delay after movie.
+    if condition == 3 && start == 0
+        WaitSecs(pre_shock_jitter);
+        painonset = GetSecs - anchor;
+        pain_value = convertStringsToChars(current_trial.stimulus);
+        pyrunfile(['.\shock.py ' pain_value]);
+        WaitSecs(post_shock_jitter);
+        logstim = strcat('Pain_', current_trial.stimulus);
+    else
+        WaitSecs(mid_trial_jitter); %delay after movie.
+    end
 
     % <===================================== SLIDE 3 - RATINGS  ========================================================>
     %% ask post stim qs
@@ -410,29 +351,29 @@ for i = 1:ntrials %iterate through movies...
 
 
 
-    % <===================================== SLIDE 2 - JITTER SHOCK ====================================================>
+    % <===================================== SLIDE 4 - JITTER SHOCK ====================================================>
     jitteronset = GetSecs - anchor;
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-    if condition == 3
+    if condition == 3 && start == 1
         WaitSecs(pre_shock_jitter);
+        painonset = GetSecs - anchor;
         pain_value = convertStringsToChars(current_trial.stimulus);
         pyrunfile(['.\shock.py ' pain_value]);
         WaitSecs(post_shock_jitter);
         logstim = strcat('Pain_', current_trial.stimulus);
+    elseif condition == 3 && start == 0
+        WaitSecs(post_trial_jitter); %delay after movie.
     else
+        painonset = -1.0;
         WaitSecs(post_trial_jitter); %delay after movie.
         logstim = current_trial.stimulus;
     end
     
     % %% log values
-    % imVal = 1;
-    % predVal = 1;
-    % fprintf(fid,'%s %d %d %d %1.3f %1.3f ',current_trial.stimulus,condition,imVal,predVal,wordStart, wordEnd);
     fprintf(fid,'%s %s %d ',logstim,current_trial.level,condition);
     %log expected fear rating and rt
-    % fprintf(fid,'%1.3f %1.3f ',pre_stim_qs_resp(1),pre_stim_qs_rt(1));
-    fprintf(fid,'%1.3f %1.3f %1.3f %1.3f ',vidstart,vidend,qonset,jitteronset);
+    fprintf(fid,'%1.3f %1.3f %1.3f %1.3f %1.3f ',vidstart,vidend,qonset,jitteronset,painonset);
     %log post stimulus questions and reaction times
     fprintf(fid,[strdupe('%1.3f ', numel(questions) * 2) '\n'], RESP_psqs,RT_psqs);
 end  
@@ -449,10 +390,6 @@ DrawFormattedText(windowptr, 'This part is complete.', 'center', 'center');%Draw
 Screen('Flip', windowptr);%Displays screen
 WaitSecs(5);
 Screen('CloseAll');
-
-%% close pain ports
-% fclose(t);
-% fclose(r);
 
 clear all;
 
