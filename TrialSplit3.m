@@ -164,7 +164,15 @@ function [spider_vids, heights_vids, pain_stim, intensity_levels] = TrialSplit3(
     pain_stim = sort([pain_low;pain_high]);
     pain_stim = string(pain_stim);
     pain_level  = [0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1];
-    pain_timings  = [0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1];
+    % pain proc, rerolls if balanced
+    pain_mixer = [0;0;0;1;1;1];
+    pain_mixer = pain_mixer(randperm(length(pain_mixer)));
+    while sum((1- pain_mixer(1:3)) == pain_mixer(4:end)) == 3
+        pain_mixer = pain_mixer(randperm(length(pain_mixer)));
+    end
+    pain_timings  = cat(1, [0;0;0;0;0;1;1;1;1;1;0], ...
+        pain_mixer(1:3), [0;1], pain_mixer(4:end), [1]);
+    % pain_timings  = [0;0;0;0;0;1;1;1;1;1;0;0;0;0;0;1;1;1;1;1];
     pain_stim = horzcat(pain_stim, pain_level, pain_timings);
 
     heights_vids = flip(heights_vids);
