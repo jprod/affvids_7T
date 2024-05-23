@@ -357,9 +357,10 @@ for i = 1:ntrials %iterate through movies...
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
     if condition == 3 && start == 1
         WaitSecs(pre_shock_jitter);
-        painonset = GetSecs - anchor;
-        pain_value = convertStringsToChars(current_trial.stimulus);
-        pyrunfile(['.\shock.py ' pain_value]);
+        painonset = -1.0;
+        % painonset = GetSecs - anchor;
+        % pain_value = convertStringsToChars(current_trial.stimulus);
+        % pyrunfile(['.\shock.py ' pain_value]);
         WaitSecs(post_shock_jitter);
         logstim = strcat('Pain_', current_trial.stimulus);
     elseif condition == 3 && start == 0
