@@ -47,7 +47,7 @@ post_stim_jitter_spiders = post_stim_jitter_spiders(randperm(length(post_stim_ji
 post_stim_jitter_heights = post_stim_jitter_heights(randperm(length(post_stim_jitter_heights)));
 
 
-jitter_shock_timings = [0.3,0.4,0.6,0.7];
+jitter_shock_timings = [0.75,0.8,0.85,0.9];
 jitter_shock_timings = post_stim_jitter_heights(randperm(length(jitter_shock_timings)));
 
 hePlace = 1;%index of heights cue time
@@ -313,7 +313,7 @@ for i = 1:ntrials %iterate through movies...
     vidend = GetSecs - anchor;
 
     % <===================================== SLIDE 2 - JITTER SHOCK ====================================================>
-    DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
+    % DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
     if condition == 3 && start == 0
         WaitSecs(pre_shock_jitter);
