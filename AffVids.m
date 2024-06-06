@@ -18,13 +18,6 @@ response_duration = 5;%how long do people get to respond to the questions
 stimulus_duration = 20; %how long do pain and videos last
 pain_subtracter = 0;
 
-cue_durationArraySp = [8,8.5,9.5,10];%cue time for spiders
-cue_durationArrayPain = [8,8.5,9.5,10];%cue time for pains
-cue_durationArrayHe = [8,8.5,9.5,10];%cue time for heights
-cue_durationArraySp = cue_durationArraySp(randperm(length(cue_durationArraySp)));%randomize w/ each run
-cue_durationArrayPain = cue_durationArraySp(randperm(length(cue_durationArrayPain)));
-cue_durationArrayHe = cue_durationArraySp(randperm(length(cue_durationArrayHe)));
-
 pre_stim_jitter_pain    = [1,1,2,2];%time for after trial jitter
 pre_stim_jitter_spiders = [1,1,2,2];
 pre_stim_jitter_heights = [1,1,2,2];
@@ -47,8 +40,8 @@ post_stim_jitter_spiders = post_stim_jitter_spiders(randperm(length(post_stim_ji
 post_stim_jitter_heights = post_stim_jitter_heights(randperm(length(post_stim_jitter_heights)));
 
 
-jitter_shock_timings = [0.75,0.8,0.85,0.9];
-jitter_shock_timings = post_stim_jitter_heights(randperm(length(jitter_shock_timings)));
+jitter_shock_timings = [0.9,0.925,0.95,0.975];
+jitter_shock_timings = jitter_shock_timings(randperm(length(jitter_shock_timings)));
 
 hePlace = 1;%index of heights cue time
 painPlace = 1;% index of pain cue time
@@ -243,14 +236,12 @@ for i = 1:ntrials %iterate through movies...
     current_trial = trials_struct(i);
     condition = current_trial.condition;
     if condition == 1
-        cue_duration      = cue_durationArrayHe(hePlace);
         post_trial_jitter = post_stim_jitter_heights(hePlace);
         pre_stim_jitter   = pre_stim_jitter_heights(hePlace);
         mid_trial_jitter  = mid_stim_jitter_heights(hePlace);
         hePlace           = hePlace + 1;
         
     elseif condition == 2
-        cue_duration      = cue_durationArraySp(spPlace);
         post_trial_jitter = post_stim_jitter_spiders(spPlace);
         pre_stim_jitter   = pre_stim_jitter_spiders(spPlace);
         mid_trial_jitter  = mid_stim_jitter_spiders(spPlace);
@@ -258,17 +249,13 @@ for i = 1:ntrials %iterate through movies...
  
     else
         start = current_trial.start;
-        cue_duration      = cue_durationArrayPain(painPlace);
         post_trial_jitter = post_stim_jitter_pain(painPlace);
         pre_stim_jitter   = pre_stim_jitter_pain(painPlace);
         mid_trial_jitter  = mid_stim_jitter_pain(painPlace);
         trial_jitter_timings = jitter_shock_timings(painPlace);
-        if start == 1
-            pre_shock_jitter = trial_jitter_timings * post_trial_jitter;
-            post_shock_jitter = (1-trial_jitter_timings) * post_trial_jitter;
-        elseif start == 0
-            pre_shock_jitter = trial_jitter_timings * mid_trial_jitter;
-            post_shock_jitter = (1-trial_jitter_timings) * mid_trial_jitter;
+        if start == 0
+            pre_shock_jitter = trial_jitter_timings * 20;
+            post_shock_jitter = (1-trial_jitter_timings) * 20;
         end
         painPlace         = painPlace + 1;
     end
@@ -278,7 +265,7 @@ for i = 1:ntrials %iterate through movies...
     [pre_stim_jitter_begin] = Screen('Flip',windowptr); %ITI blank screen
     WaitSecs(pre_stim_jitter); %delay after movie.
     
-    % <===================================== SLIDE 1 - VIDEO or CUE ====================================================>
+    % <===================================== SLIDE 1 - VIDEO or SHOCK CUE ====================================================>
     vidstart = GetSecs - anchor;
     if(current_trial.video_trial)
         %% play videos
@@ -308,23 +295,22 @@ for i = 1:ntrials %iterate through movies...
             DrawFormattedText(windowptr, 'Low', 'center', 'center');
         end
         [PainCueOnset] = Screen('Flip',windowptr);
-        WaitSecs(20);       
+        if start == 0
+            WaitSecs(pre_shock_jitter);
+            painonset = GetSecs - anchor;
+            pain_value = convertStringsToChars(current_trial.stimulus);
+            pyrunfile(['.\shock.py ' pain_value]);
+            WaitSecs(post_shock_jitter);
+        else
+            WaitSecs(20);
+        end  
     end
     vidend = GetSecs - anchor;
 
-    % <===================================== SLIDE 2 - JITTER SHOCK ====================================================>
+    % <===================================== SLIDE 2 - JITTER ==========================================================>
     % DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-    if condition == 3 && start == 0
-        WaitSecs(pre_shock_jitter);
-        painonset = GetSecs - anchor;
-        pain_value = convertStringsToChars(current_trial.stimulus);
-        pyrunfile(['.\shock.py ' pain_value]);
-        WaitSecs(post_shock_jitter);
-        logstim = strcat('Pain_', current_trial.stimulus);
-    else
-        WaitSecs(mid_trial_jitter); %delay after movie.
-    end
+    WaitSecs(mid_trial_jitter); %delay after movie.
 
     % <===================================== SLIDE 3 - RATINGS  ========================================================>
     %% ask post stim qs
@@ -351,20 +337,16 @@ for i = 1:ntrials %iterate through movies...
 
 
 
-    % <===================================== SLIDE 4 - JITTER SHOCK ====================================================>
+    % <===================================== SLIDE 4 - JITTER ==========================================================>
     jitteronset = GetSecs - anchor;
     DrawFormattedText(windowptr, '+', 'center', 'center');%Draw text , 60, 0, 0, 1.5
     [StimulusOffset] = Screen('Flip',windowptr); %ITI blank screen
-    if condition == 3 && start == 1
-        WaitSecs(pre_shock_jitter);
-        painonset = -1.0;
-        % painonset = GetSecs - anchor;
-        % pain_value = convertStringsToChars(current_trial.stimulus);
-        % pyrunfile(['.\shock.py ' pain_value]);
-        WaitSecs(post_shock_jitter);
-        logstim = strcat('Pain_', current_trial.stimulus);
-    elseif condition == 3 && start == 0
+    if condition == 3
+        if start == 1
+            painonset = -1.0;
+        end
         WaitSecs(post_trial_jitter); %delay after movie.
+        logstim = strcat('Pain_', current_trial.stimulus);
     else
         painonset = -1.0;
         WaitSecs(post_trial_jitter); %delay after movie.
